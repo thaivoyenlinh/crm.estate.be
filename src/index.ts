@@ -5,6 +5,7 @@ import { HTTPException } from "hono/http-exception"
 import type { ContentfulStatusCode } from "hono/utils/http-status"
 
 import type { AppEnv } from "./env"
+import { parseAllowedOrigins } from "./lib/origins"
 import { problem, validationHook } from "./lib/problem"
 import { authRoutes } from "./modules/auth/routes"
 
@@ -18,7 +19,7 @@ const ERROR_CODES: Partial<Record<number, string>> = {
 const app = new OpenAPIHono<AppEnv>({ defaultHook: validationHook })
 
 app.use("*", (c, next) => {
-  const allowedOrigins = c.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
+  const allowedOrigins = parseAllowedOrigins(c.env)
   const handler = cors({
     allowHeaders: ["Authorization", "Content-Type", "X-Requested-With"],
     allowMethods: ["GET", "OPTIONS", "POST"],

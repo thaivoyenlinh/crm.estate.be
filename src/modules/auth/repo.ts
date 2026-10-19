@@ -18,6 +18,20 @@ export type LockPolicy = {
   windowMs: number
 }
 
+export type NewRefreshToken = {
+  expiresAt: number
+  familyId: string
+  tokenHash: string
+  userId: string
+}
+
+export type RefreshTokenRotation = {
+  currentHash: string
+  expiresAt: number
+  nextHash: string
+  now: number
+}
+
 const USER_COLUMNS = "id, email, name, password_hash, is_active"
 
 export const findUserByEmail = (db: D1Database, email: string) =>
@@ -58,3 +72,39 @@ export const lockLogin = (db: D1Database, email: string, lockedUntil: number) =>
 
 export const clearLoginAttempts = (db: D1Database, email: string) =>
   db.prepare("DELETE FROM login_attempts WHERE email = ?1").bind(email).run()
+
+export const insertRefreshToken = (db: D1Database, token: NewRefreshToken) =>
+  db
+    .prepare("INSERT INTO refresh_tokens (token_hash, family_id, user_id, expires_at) VALUES (?1, ?2, ?3, ?4)")
+    .bind(token.tokenHash, token.familyId, token.userId, token.expiresAt)
+    .run()
+
+export const rotateRefreshToken = async (db: D1Database, rotation: RefreshTokenRotation) => {
+  const [inserted] = await db.batch<Pick<UserRow, "id">>([
+    db
+      .prepare(
+        `INSERT INTO refresh_tokens (token_hash, family_id, user_id, expires_at)
+         SELECT ?2, refresh_tokens.family_id, refresh_tokens.user_id, ?4
+         FROM refresh_tokens JOIN users ON users.id = refresh_tokens.user_id
+         WHERE refresh_tokens.token_hash = ?1
+           AND refresh_tokens.used_at IS NULL
+           AND refresh_tokens.expires_at > ?3
+           AND users.is_active = 1
+         RETURNING user_id AS id`,
+      )
+      .bind(rotation.currentHash, rotation.nextHash, rotation.now, rotation.expiresAt),
+    db
+      .prepare("UPDATE refresh_tokens SET used_at = ?2 WHERE token_hash = ?1 AND used_at IS NULL")
+      .bind(rotation.currentHash, rotation.now),
+  ])
+  return inserted.results[0]?.id ?? null
+}
+
+export const revokeRefreshTokenFamily = (db: D1Database, tokenHash: string) =>
+  db
+    .prepare(
+      `DELETE FROM refresh_tokens
+       WHERE family_id = (SELECT family_id FROM refresh_tokens WHERE token_hash = ?1)`,
+    )
+    .bind(tokenHash)
+    .run()
