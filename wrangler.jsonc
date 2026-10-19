@@ -1,0 +1,10 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "crm-estate-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-01",
+  "d1_databases": [{ "binding": "DB", "database_name": "crm-estate" }],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://crm-estate.tvylinh.workers.dev,http://localhost:4200",
+  },
+}

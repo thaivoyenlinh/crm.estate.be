@@ -1,0 +1,24 @@
+{
+  "name": "crm-estate-be",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.1.0",
+  "scripts": {
+    "db:migrate:local": "wrangler d1 migrations apply crm-estate --local",
+    "db:seed:local": "wrangler d1 execute crm-estate --local --file=.wrangler/seed-user.sql",
+    "dev": "wrangler dev",
+    "seed:user": "node scripts/seed-user.ts",
+    "typecheck": "wrangler types && tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "0.6.1",
+    "@hono/zod-openapi": "1.6.3",
+    "hono": "4.13.13",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "6.0.3",
+    "wrangler": "4.151.1"
+  }
+}
