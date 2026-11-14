@@ -3,7 +3,13 @@
   "name": "crm-estate-api",
   "main": "src/index.ts",
   "compatibility_date": "2026-10-01",
-  "d1_databases": [{ "binding": "DB", "database_name": "crm-estate" }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_id": "cdf69bdb-984e-4dc0-b2c3-13f9462d63a1",
+      "database_name": "crm-estate",
+    },
+  ],
   "vars": {
     "ALLOWED_ORIGINS": "https://crm-estate.tvylinh.workers.dev,http://localhost:4200",
   },
