@@ -10,6 +10,7 @@
       "database_name": "crm-estate",
     },
   ],
+  "secrets": { "required": ["JWT_SECRET"] },
   "vars": {
     "ALLOWED_ORIGINS": "https://crm-estate.tvylinh.workers.dev,http://localhost:4200",
   },
